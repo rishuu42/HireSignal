@@ -2,8 +2,6 @@
 
 > A fully automated data pipeline that scrapes, cleans, and surfaces real-time hiring signals from HackerNews — built for B2B sales, recruitment, and market intelligence use cases.
 
-**Live demo:** [your-deployment-url.render.com](#deployment)
-
 ---
 
 ## The Problem Being Solved
@@ -54,53 +52,50 @@ This pipeline collects, cleans, and delivers that data through a queryable API a
 
 ---
 
-## Local Setup
-
-### 1. Clone and install
+## Quickstart — One Command
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/hiresignal.git
 cd hiresignal
-pip install -r requirements.txt
+python run.py
 ```
 
-### 2. Run the pipeline (scrape + clean + store)
+That's it. `run.py` will:
+1. Install all dependencies automatically
+2. Scrape live job posts from HackerNews (~60–90 seconds)
+3. Clean and store the data into SQLite
+4. Launch the dashboard at **http://localhost:5000** (opens in browser automatically)
 
-```bash
-python scheduler.py
-```
+> **Requirements:** Python 3.9+ and pip. No API keys needed.
 
-This runs the full pipeline immediately, then keeps running every 24 hours.
-Wait ~2 minutes for the first run to complete (fetches ~200 posts).
+---
 
-To run just once without the scheduler:
-
-```bash
-python scraper.py        # → data/raw_jobs.json
-python cleaner.py        # → data/jobs.db
-```
-
-### 3. Start the API server
-
-```bash
-python app.py
-```
-
-Open [http://localhost:5000](http://localhost:5000) in your browser.
-
-### 4. Environment variables
-
-Copy `.env.example` to `.env`:
-
-```bash
-cp .env.example .env
-```
+## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `5000` | Port for the Flask server |
 
-> No API keys are required. This project uses the public HackerNews Firebase API (`https://hacker-news.firebaseio.com/v0`).
+No API keys are required. This project uses the public HackerNews Firebase API (`https://hacker-news.firebaseio.com/v0`).
+
+---
+
+## Running Individual Steps (optional)
+
+If you want to run each phase separately:
+
+```bash
+pip install -r requirements.txt
+python scraper.py        # → data/raw_jobs.json
+python cleaner.py        # → data/jobs.db
+python app.py            # → http://localhost:5000
+```
+
+To run the pipeline on a 24-hour automated schedule:
+
+```bash
+python scheduler.py
+```
 
 ---
 
@@ -165,28 +160,7 @@ curl -X POST http://localhost:5000/api/refresh
 
 ---
 
-## Deployment
 
-### Deploy to Render (free tier, recommended)
-
-1. Push your code to GitHub
-2. Go to [render.com](https://render.com) → **New Web Service**
-3. Connect your GitHub repo
-4. Set:
-   - **Build command:** `pip install -r requirements.txt && python scheduler.py &`
-   - **Start command:** `gunicorn app:app --bind 0.0.0.0:$PORT`
-   - **Environment:** Python 3
-5. Click **Deploy**
-
-> Render's free tier spins down after inactivity. For a persistent worker + web combo, use the Background Worker + Web Service setup with the `Procfile`.
-
-### One-command local run
-
-```bash
-pip install -r requirements.txt && python scheduler.py & sleep 90 && python app.py
-```
-
----
 
 ## Data Cleaning Decisions
 
@@ -203,25 +177,6 @@ All decisions are documented inline in `cleaner.py`. Summary:
 
 ---
 
-## Bonus: AI Layer
-
-A natural extension (not implemented in this MVP due to time constraints) would be to pass each job post through an LLM to:
-
-1. **Classify company stage** (seed / series A / enterprise) based on post language
-2. **Extract structured YAML** from free-text posts (company, role, comp, equity)
-3. **Generate a "hiring intent score"** — how aggressively is this company hiring?
-
-**Why this approach:** LLMs handle the ambiguity of natural language far better than regex for structured extraction. A single `claude-haiku` call per post (< $0.001) would dramatically improve field extraction quality.
-
-**Trade-offs:**
-- Cost: ~$0.20 per full run of 200 posts
-- Latency: adds ~30s to pipeline run
-- Dependency: requires API key and network
-
-This is a clear Phase 2 improvement once the pipeline baseline is validated.
-
----
-
 ## Project Structure
 
 ```
@@ -231,7 +186,7 @@ hiresignal/
 ├── scheduler.py        # Runs pipeline automatically every 24h
 ├── app.py              # Flask API + dashboard UI
 ├── requirements.txt
-├── Procfile            # For Render/Railway deployment
+├── run.py              # Single File to run the Scraper
 ├── .env.example
 ├── .gitignore
 └── data/               # Created at runtime
@@ -251,5 +206,3 @@ hiresignal/
 - **Gunicorn** — production WSGI server
 
 ---
-
-*Built as a data engineering internship assignment. Demonstrates end-to-end pipeline design: acquisition → transformation → storage → delivery → automation.*
