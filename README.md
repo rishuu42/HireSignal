@@ -55,8 +55,8 @@ This pipeline collects, cleans, and delivers that data through a queryable API a
 ## Quickstart — One Command
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/hiresignal.git
-cd hiresignal
+git clone https://github.com/rishuu42/HireSignal.git
+cd HireSignal
 python run.py
 ```
 
