@@ -1,15 +1,3 @@
-"""
-app.py
-------
-Flask API exposing job intelligence data with a built-in dashboard.
-
-Endpoints:
-  GET /           → Dashboard UI
-  GET /api/jobs   → JSON list of jobs (supports ?remote=true, ?tech=Python, ?role=Engineer, ?limit=50)
-  GET /api/stats  → Aggregate stats (top techs, top locations, remote %)
-  POST /api/refresh → Manually trigger a pipeline run
-"""
-
 import json
 import sqlite3
 import os
